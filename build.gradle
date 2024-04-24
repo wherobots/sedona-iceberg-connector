@@ -1,0 +1,57 @@
+plugins {
+    id 'java'
+    id 'scala'
+}
+
+group = 'com.wherobots'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral() {
+        content {
+            excludeModule("javax.media", "jai_core")
+        }
+    }
+    mavenLocal()
+    maven {
+        url = uri("https://maven.pkg.github.com/wherobots/packages")
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
+            password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+    maven {
+        url = uri("https://repo.osgeo.org/repository/release/")
+    }
+}
+
+dependencies {
+    compileOnly("org.apache.spark:spark-core_2.12:3.5.1")
+    compileOnly("org.apache.spark:spark-sql_2.12:3.5.1")
+    compileOnly("com.wherobots.havasu:iceberg-spark-3.5_2.12:1.1.0-SNAPSHOT") {
+        exclude group: 'org.apache.spark'
+    }
+    compileOnly("org.apache.sedona:sedona-spark-3.5_2.12:1.6.0-SNAPSHOT") {
+        exclude group: 'org.apache.spark'
+    }
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.scalatest:scalatest_2.12:3.2.18'
+    testImplementation "org.scalatestplus:junit-5-10_2.12:3.2.18.0"
+
+    testImplementation("org.apache.spark:spark-core_2.12:3.5.1")
+    testImplementation("org.apache.spark:spark-sql_2.12:3.5.1")
+    testImplementation("com.wherobots.havasu:iceberg-spark-runtime-3.5_2.12:1.1.0-SNAPSHOT")
+    testImplementation("org.apache.sedona:sedona-spark-3.5_2.12:1.6.0-SNAPSHOT")
+    testImplementation("org.datasyslab:geotools-wrapper:1.5.1-28.2")
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'scalatest'
+        testLogging {
+            events("passed", "skipped", "failed", "standard_error")
+        }
+    }
+}
